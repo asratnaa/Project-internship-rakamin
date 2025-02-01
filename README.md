@@ -4,8 +4,8 @@
 Repository ini berisi query **analisis data** dan **data cleansing** yang telah dilakukan dalam tugas **internship Rakamin** menggunakan **Google BigQuery**.  
 
 ## 📂 File Structure  
-- **`data_cleansing`** → Query SQL untuk membersihkan data sebelum dilakukan analisis.  
-- **`query_analysis`** → Query SQL yang digunakan untuk analisis data setelah proses cleansing selesai.  
+- **`cleansing data`** → Query SQL untuk membersihkan data sebelum dilakukan analisis.  
+- **`query analisis`** → Query SQL yang digunakan untuk analisis data setelah proses cleansing selesai.  
 
 ## 🚀 Project Description  
 Proyek ini bertujuan untuk:  
@@ -15,13 +15,13 @@ Proyek ini bertujuan untuk:
 
 
 ## 💡 How to Use  
-1. Jalankan **`data_cleansing.sql`** untuk membersihkan data dari anomali atau inkonsistensi.  
-2. Setelah data bersih, jalankan **`query_analysis.sql`** untuk mendapatkan insight dari data.  
+1. Jalankan **`cleansing data`** untuk membersihkan data dari anomali atau inkonsistensi.  
+2. Setelah data bersih, jalankan **`query analisis`** untuk mendapatkan insight dari data.  
 3. Hasil analisis dapat diekspor ke CSV atau digunakan untuk visualisasi lebih lanjut.  
 
 ## 🛠 Tools & Technologies  
 - **Google BigQuery**  
-- **SQL**  
+- **Google Looker Studio** (https://lookerstudio.google.com/reporting/5765442f-df1f-4cbd-a93e-ac0500d2b049)  
 
 ---
 
