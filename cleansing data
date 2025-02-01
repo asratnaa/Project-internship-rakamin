@@ -1,0 +1,66 @@
+select * from kimia_farma.kf_final_transaction ;
+select * from kimia_farma.kf_inventory;
+select * from kimia_farma.kf_kantor_cabang;
+select * from kimia_farma.kf_product;
+
+
+--- identifikasi data null 
+--- tabel kimia_farma.kf_final_transaction
+select count(*) total_row,
+  sum (case when  transaction_id is null then 1 else 0 end )  transaction_id_null,
+  sum(case when date is null then 1 else 0 end) date_null,
+  sum(case when branch_id is null then 1 else 0 end) branch_id_null,
+  sum(case when customer_name is null then 1 else 0 end) customer_name_null,
+  sum(case when product_id is null then 1 else 0 end) product_id
+from kimia_farma.kf_final_transaction;
+
+--- tabel kimia_farma.kf_inventory
+select count(*) total_row ,
+  sum(case when Inventory_ID is null then 1 else 0 end) Inventory_ID_null,
+  sum(case when branch_id is null then 1 else 0 end ) branch_id_null,
+  sum(case when product_id is null then 1 else 0 end ) product_id_null,
+  sum(case when product_name is null then 1 else 0 end) product_name_null
+from kimia_farma.kf_inventory;
+
+--- tabel kimia_farma.kf_kantor_cabang
+select count(*) total_row ,
+  sum(case when branch_id is null then 1 else 0 end) branch_id_null,
+  sum(case when branch_category is null then 1 else 0 end ) branch_category_null,
+  sum(case when branch_name is null then 1 else 0 end ) branch_name_null,
+  sum(case when kota is null then 1 else 0 end) kota_null,
+  sum(case when provinsi is null then 1 else 0 end) provinsi_null,
+  sum(case when rating is null then 1 else 0 end) rating_null
+from kimia_farma.kf_kantor_cabang;
+
+---tabel kimia_farma.kf_product;
+
+select count(*) total_row ,
+  sum(case when product_id is null then 1 else 0 end) product_id_null,
+  sum(case when product_name is null then 1 else 0 end ) product_name_null,
+  sum(case when product_category is null then 1 else 0 end ) product_category_null,
+  sum(case when price is null then 1 else 0 end) price_null
+from kimia_farma.kf_product;
+
+select max(rating) from kimia_farma.kf_kantor_cabang;
+
+--- duplicate 
+SELECT customer_name,transaction_id,COUNT(*) AS count
+FROM kimia_farma.kf_final_transaction
+GROUP BY customer_name, transaction_id
+HAVING COUNT(*) > 1;
+
+
+SELECT Inventory_ID,COUNT(*) AS count
+FROM kimia_farma.kf_inventory
+GROUP BY Inventory_ID
+HAVING COUNT(*) > 1;
+
+SELECT branch_id,COUNT(*) AS count
+FROM  kimia_farma.kf_kantor_cabang
+GROUP BY branch_id
+HAVING COUNT(*) > 1;
+
+SELECT product_id,COUNT(*) AS count
+FROM  kimia_farma.kf_product
+GROUP BY product_id
+HAVING COUNT(*) > 1;
