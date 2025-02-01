@@ -1,0 +1,136 @@
+select * from kimia_farma.kf_final_transaction ;
+select * from kimia_farma.kf_inventory;
+select * from kimia_farma.kf_kantor_cabang;
+select * from kimia_farma.kf_product;
+
+
+---TABEL ANALISIS 
+CREATE TABLE kimia_farma.analisis_transaksi AS
+SELECT
+    f.transaction_id,
+    f.date,
+    f.branch_id,
+    k.branch_name,
+    k.kota,
+    k.provinsi,
+    k.rating AS rating_cabang,
+    f.customer_name,
+    p.product_id,
+    p.product_name,
+    p.price AS actual_price,
+    f.discount_percentage,
+    
+    -- Menghitung persentase gross laba berdasarkan harga produk
+    CASE
+        WHEN p.price <= 50000 THEN 10
+        WHEN p.price > 50000 AND p.price <= 100000 THEN 15
+        WHEN p.price > 100000 AND p.price <= 300000 THEN 20
+        WHEN p.price > 300000 AND p.price <= 500000 THEN 25
+        WHEN p.price > 500000 THEN 30
+    END AS persentase_gross_laba,
+
+    -- Menghitung nett sales setelah diskon
+    p.price * (1 - f.discount_percentage / 100) AS nett_sales,
+
+    -- Menghitung nett profit berdasarkan persentase laba kotor
+    (p.price * (1 - f.discount_percentage / 100)) * 
+    (CASE
+        WHEN p.price <= 50000 THEN 0.10
+        WHEN p.price > 50000 AND p.price <= 100000 THEN 0.15
+        WHEN p.price > 100000 AND p.price <= 300000 THEN 0.20
+        WHEN p.price > 300000 AND p.price <= 500000 THEN 0.25
+        WHEN p.price > 500000 THEN 0.30
+    END) AS nett_profit,
+
+    f.rating AS rating_transaksi
+
+FROM kimia_farma.kf_final_transaction AS f
+LEFT JOIN kimia_farma.kf_kantor_cabang AS k
+    ON f.branch_id = k.branch_id
+LEFT JOIN kimia_farma.kf_product AS p
+    ON f.product_id = p.product_id;
+
+
+select * from kimia_farma.analisis_transaksi;
+
+
+
+
+--- perbandingan pendapatan kimia farma dari tahun ke tahun
+select extract(month from date ) as months,
+       extract (year from date ) as years,
+       SUM(price * (1 - discount_percentage)) AS total_pendapatan
+from  kimia_farma.kf_final_transaction
+group by months,years
+order by months,years;
+
+----top 10 total transaksi
+select k.provinsi ,count(f.transaction_id) total_transaksi
+from kimia_farma.kf_final_transaction f join kimia_farma.kf_kantor_cabang k
+        on f.branch_id = k.branch_id
+group by k.provinsi
+order by count(f.transaction_id) desc
+limit 10  ;     
+
+--- top 10 net sales
+select k.provinsi ,SUM(f.price * (1 - f.discount_percentage)) AS net_sales
+from kimia_farma.kf_final_transaction f join kimia_farma.kf_kantor_cabang k
+        on f.branch_id = k.branch_id
+group by k.provinsi
+order by net_sales desc
+limit 10  ; 
+
+----top 5 cabang rating tertinggi
+select k.provinsi , f.rating as rating_transaksi,k.rating as rating_cabang
+from kimia_farma.kf_final_transaction f join kimia_farma.kf_kantor_cabang k
+        on f.branch_id = k.branch_id
+order by k.rating desc,f.rating asc
+limit 5  ; 
+
+--- untuk geo map
+select k.provinsi ,k.kota,
+      SUM(f.price * (1 - f.discount_percentage)) AS net_sales
+from kimia_farma.kf_final_transaction f join kimia_farma.kf_kantor_cabang k
+      on f.branch_id = k.branch_id
+group by k.provinsi,k.kota; 
+
+--- total pendapatan perproduct
+select p.product_name, p.product_category,
+      SUM(f.price * (1 - f.discount_percentage)) AS total_pendapatan
+from kimia_farma.kf_final_transaction f join kimia_farma.kf_product p
+      on f.product_id = p.product_id
+group by p.product_name, p.product_category
+order by total_pendapatan desc;
+
+
+---- cabang provinsi product terlaris
+
+with pendapatan_product as (
+    select p.product_name, p.product_category, f.branch_id,
+        count(f.transaction_id) AS total_transaksi
+  from kimia_farma.kf_final_transaction f join kimia_farma.kf_product p
+        on f.product_id = p.product_id
+  group by p.product_name, p.product_category, f.branch_id
+  order by total_transaksi desc
+)
+select p.total_transaksi,k.provinsi, p.product_name,p.product_category
+from pendapatan_product p join kimia_farma.kf_kantor_cabang k
+      on p.branch_id = k.branch_id
+order by total_transaksi desc;
+
+
+---  Analisis Penilaian Cabang dan Produk
+SELECT 
+    c.branch_name,
+    c.rating AS branch_rating,
+    SUM(f.price * (1 - f.discount_percentage)) AS total_penjualan
+FROM 
+    kimia_farma.kf_kantor_cabang c
+JOIN 
+    kimia_farma.kf_final_transaction f 
+    ON c.branch_id = f.branch_id
+GROUP BY 
+    c.branch_name, c.rating
+ORDER BY 
+    total_penjualan DESC;
+
